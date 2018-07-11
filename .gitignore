@@ -1,0 +1,6 @@
+bin
+obj
+Properties
+*.config
+JointMVS.Tools.DepthDiff.csproj
+JointMVS.Tools.DepthDiff.csproj.user
