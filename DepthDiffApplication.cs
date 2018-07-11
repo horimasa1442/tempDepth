@@ -494,6 +494,13 @@ namespace DepthDiff
                 }
             }
         }
+
+        void GenerateErrorMapSimple(Camera camera, double[] sourceDepthMap, double[] targetDepthMap, 
+                                    Vector3[] sourceNormals, Vector3[] targetNormals,
+                                    out double errorSquareSum, out int errorCount, out Mat errorMat, out double angleErrorSum, out int angleErrorCount){
+                                        
+                                    }
+
         void GenerateMedian(Camera camera, double[] sourceDepthMap, double[] targetDepthMap, List<double[]> otherDepthMaps, Vector3[] sourceNormals, Vector3[] targetNormals, double scale, out List<double> OverMaxError, out int OverMaxErrorCount)
         {
             OverMaxError = new List<double>();
