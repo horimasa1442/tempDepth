@@ -280,8 +280,8 @@ namespace DepthDiff
                     double angleErrorSum;
                     int angleErrorCount;
 
-
-                    this.GenerateErrorMap(camera, sourceDepthMaps[ci], targetDepthMaps[i][ci], targetDepthMaps.Select(dm => dm[ci]).ToList(), sourceNormals[ci], targetNormals[i][ci], option.ErrorScale, medianThreshold[ci], out errorSquareSum, out errorCount, out errorMat, out angleErrorSum, out angleErrorCount);
+                    Console.WriteLine("simple");
+                    this.GenerateErrorMapSimple(camera, sourceDepthMaps[ci], targetDepthMaps[i][ci], sourceNormals[ci], targetNormals[i][ci], option.ErrorScale, out errorSquareSum, out errorCount, out errorMat, out angleErrorSum, out angleErrorCount);
                     errorMat.SaveImage(Path.Combine(option.OutputPath, string.Format("{0}_error_target_{1}.png", imageFilename, i)));
                     errorMat.Dispose();
 
@@ -328,7 +328,7 @@ namespace DepthDiff
                 {
                     int offset = y * camera.Width + x;
                     depths[offset] = -1.0;
-                    normals[offset] = Vector3::Zero();
+                    normals[offset] = new Vector3(0.0, 0.0, 0.0);
                     Vector3 localTarget = new Vector3(((double)x - camera.CX) / camera.FX, ((double)y - camera.CY) / camera.FY, 1.0);
                     Vector3 worldTarget = Vector3.Transform(camera.World, localTarget);
                     Vector3 worldOrigin = Vector3.Transform(camera.World, Vector3.Zero);
@@ -498,7 +498,7 @@ namespace DepthDiff
         }
 
         void GenerateErrorMapSimple(Camera camera, double[] sourceDepthMap, double[] targetDepthMap, 
-                                    Vector3[] sourceNormals, Vector3[] targetNormals,
+                                    Vector3[] sourceNormals, Vector3[] targetNormals, double scale,
                                     out double errorSquareSum, out int errorCount, out Mat errorMat, out double angleErrorSum, out int angleErrorCount)
         {
              errorMat = Mat.Zeros(new Size(camera.Width, camera.Height), MatType.CV_8UC3);
