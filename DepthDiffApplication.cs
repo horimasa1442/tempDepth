@@ -327,6 +327,8 @@ namespace DepthDiff
                 for (int x = 0; x < camera.Width; x++)
                 {
                     int offset = y * camera.Width + x;
+                    depths[offset] = -1.0;
+                    normals[offset] = Vector3::Zero();
                     Vector3 localTarget = new Vector3(((double)x - camera.CX) / camera.FX, ((double)y - camera.CY) / camera.FY, 1.0);
                     Vector3 worldTarget = Vector3.Transform(camera.World, localTarget);
                     Vector3 worldOrigin = Vector3.Transform(camera.World, Vector3.Zero);
@@ -497,9 +499,44 @@ namespace DepthDiff
 
         void GenerateErrorMapSimple(Camera camera, double[] sourceDepthMap, double[] targetDepthMap, 
                                     Vector3[] sourceNormals, Vector3[] targetNormals,
-                                    out double errorSquareSum, out int errorCount, out Mat errorMat, out double angleErrorSum, out int angleErrorCount){
-                                        
-                                    }
+                                    out double errorSquareSum, out int errorCount, out Mat errorMat, out double angleErrorSum, out int angleErrorCount)
+        {
+             errorMat = Mat.Zeros(new Size(camera.Width, camera.Height), MatType.CV_8UC3);
+
+            errorSquareSum = 0.0;
+            errorCount = 0;
+            angleErrorSum = 0.0;
+            angleErrorCount = 0;
+            
+            for (int y = 0; y < camera.Height; y++)
+            {
+                for (int x = 0; x < camera.Width; x++)
+                {
+                    int offset = y * camera.Width + x;
+
+                    double sourceDepth = sourceDepthMap[offset];
+                    Vector3 sourceNormal = sourceNormals[offset];
+                    double targetDepth = targetDepthMap[offset];
+                    Vector3 targetNormal = targetNormals[offset];
+
+                    if (sourceDepth <= 0 || targetDepth <= 0)
+                    {
+                        continue;
+                    }
+
+                    double error = sourceDepth - targetDepth;
+                    errorSquareSum += error * error;
+                    errorCount += 1;
+                    double r, g, b;
+                    ImageHelper.PseudoColor(Math.Min(1.0, Math.Abs(error / scale)), out r, out g, out b);
+                    ImageHelper.SetPixel(errorMat, y, x, new Vector3(r, g, b) * 255.0);
+                    
+                    double angleError = Math.Acos(Vector3.Dot(sourceNormal, targetNormal)) * 180.0 / Math.PI;
+                    angleErrorSum += angleError;
+                    angleErrorCount += 1;
+                }
+            }
+        }
 
 
         void GenerateMedian(Camera camera, double[] sourceDepthMap, double[] targetDepthMap, List<double[]> otherDepthMaps, Vector3[] sourceNormals, Vector3[] targetNormals, double scale, out List<double> OverMaxError, out int OverMaxErrorCount)
